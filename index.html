@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoVault</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>PhotoVault</h1>
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#upload">Upload</a>
+            <a href="#gallery">Gallery</a>
+        </nav>
+    </header>
+
+    <!-- Home Section -->
+    <section id="home" class="hero">
+        <h1>Capture Life's Beautiful Moments</h1>
+        <p>Share your amazing photography with our community</p>
+        <a href="#gallery" class="btn">View Gallery</a>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="upload" class="upload">
+        <h2>Upload Photos</h2>
+        <div class="upload-box">
+            <input type="file" id="fileInput" accept="image/*" multiple>
+            <label for="fileInput">📷 Choose Files</label>
+            <input type="text" id="titleInput" placeholder="Photo title">
+            <select id="categoryInput">
+                <option value="nature">Nature</option>
+                <option value="portrait">Portrait</option>
+                <option value="landscape">Landscape</option>
+                <option value="urban">Urban</option>
+            </select>
+            <button onclick="uploadPhotos()">Upload</button>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery">
+        <h2>Photo Gallery</h2>
+        
+        <!-- Filters -->
+        <div class="filters">
+            <button onclick="filterPhotos('all')" class="active">All</button>
+            <button onclick="filterPhotos('nature')">Nature</button>
+            <button onclick="filterPhotos('portrait')">Portrait</button>
+            <button onclick="filterPhotos('landscape')">Landscape</button>
+            <button onclick="filterPhotos('urban')">Urban</button>
+            <button onclick="filterPhotos('uploaded')">My Uploads</button>
+        </div>
+
+        <!-- Photo Grid -->
+        <div class="grid" id="photoGrid">
+            <!-- Sample Photos -->
+            <div class="photo-item nature">
+                <img src="/placeholder.svg?height=200&width=300" alt="Nature">
+                <h3>Forest Path</h3>
+                <p>Nature</p>
+            </div>
+            <div class="photo-item portrait">
+                <img src="/placeholder.svg?height=200&width=300" alt="Portrait">
+                <h3>Portrait</h3>
+                <p>Portrait</p>
+            </div>
+            <div class="photo-item landscape">
+                <img src="/placeholder.svg?height=200&width=300" alt="Landscape">
+                <h3>Mountain View</h3>
+                <p>Landscape</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Simple Modal -->
+    <div id="modal" class="modal" onclick="closeModal()">
+        <img id="modalImg" src="/placeholder.svg" alt="">
+        <span class="close">&times;</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        let uploadCount = 0;
+
+        // Upload photos
+        function uploadPhotos() {
+            const files = document.getElementById('fileInput').files;
+            const title = document.getElementById('titleInput').value || 'Untitled';
+            const category = document.getElementById('categoryInput').value;
+
+            if (files.length === 0) {
+                alert('Please select files!');
+                return;
+            }
+
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadCount++;
+                    const photoTitle = files.length > 1 ? `${title} ${index + 1}` : title;
+                    addPhoto(e.target.result, photoTitle, category);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Clear form
+            document.getElementById('fileInput').value = '';
+            document.getElementById('titleInput').value = '';
+            alert('Photos uploaded!');
+        }
+
+        // Add photo to gallery
+        function addPhoto(src, title, category) {
+            const grid = document.getElementById('photoGrid');
+            const photoDiv = document.createElement('div');
+            photoDiv.className = `photo-item ${category} uploaded`;
+            photoDiv.innerHTML = `
+                <img src="${src}" alt="${title}" onclick="openModal('${src}')">
+                <h3>${title}</h3>
+                <p>${category} <span class="new">NEW</span></p>
+                <button class="delete-btn" onclick="deletePhoto(this)">🗑️</button>
+            `;
+            grid.insertBefore(photoDiv, grid.firstChild);
+        }
+
+        // Filter photos
+        function filterPhotos(category) {
+            const photos = document.querySelectorAll('.photo-item');
+            const buttons = document.querySelectorAll('.filters button');
+            
+            // Update active button
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show/hide photos
+            photos.forEach(photo => {
+                if (category === 'all' || photo.classList.contains(category)) {
+                    photo.style.display = 'block';
+                } else {
+                    photo.style.display = 'none';
+                }
+            });
+        }
+
+        // Delete photo
+        function deletePhoto(button) {
+            if (confirm('Delete this photo?')) {
+                button.parentElement.remove();
+            }
+        }
+
+        // Modal functions
+        function openModal(src) {
+            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('modalImg').src = src;
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Close modal with ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>
